@@ -1,4 +1,5 @@
 require "sprockets/manifest"
+require "pathname"
 
 module NonStupidDigestAssets
   mattr_accessor :whitelist
@@ -30,15 +31,18 @@ module NonStupidDigestAssets
         full_non_digest_path = File.join dir, logical_path
         full_non_digest_gz_path = "#{full_non_digest_path}.gz"
 
+        relative_digest_name = Pathname.new(full_digest_path).relative_path_from(Pathname.new(full_non_digest_path).dirname).to_s
+        relative_digest_gz_name = Pathname.new(full_digest_gz_path).relative_path_from(Pathname.new(full_non_digest_gz_path).dirname).to_s
+
         if File.exists? full_digest_path
           logger.debug "Writing #{full_non_digest_path}"
-          FileUtils.ln_s full_digest_path, full_non_digest_path, :force => true
+          FileUtils.ln_s relative_digest_name, full_non_digest_path, :force => true
         else
           logger.debug "Could not find: #{full_digest_path}"
         end
         if File.exists? full_digest_gz_path
           logger.debug "Writing #{full_non_digest_gz_path}"
-          FileUtils.ln_s full_digest_gz_path, full_non_digest_gz_path, :force => true
+          FileUtils.ln_s relative_digest_gz_name, full_non_digest_gz_path, :force => true
         else
           logger.debug "Could not find: #{full_digest_gz_path}"
         end
